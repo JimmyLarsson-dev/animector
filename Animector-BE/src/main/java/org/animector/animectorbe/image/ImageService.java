@@ -35,13 +35,13 @@ public class ImageService {
         try {
             String filename = generateFilename(file);
             Path dest = Paths.get(uploadDir.toUri()).resolve(filename);
-            try (InputStream in = file.getInputStream()) {
-                Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, dest, StandardCopyOption.REPLACE_EXISTING);
             }
             ImageData imageData = ImageData.builder()
                     .fileName(filename)
                     .fileSize(file.getSize())
-                    .content(file.getContentType())
+                    .content("something something")
                     .message(message).build();
             imageRepo.save(imageData);
             return ResponseEntity.ok("Saved to: " + dest.toString() + " | message=" + message);
