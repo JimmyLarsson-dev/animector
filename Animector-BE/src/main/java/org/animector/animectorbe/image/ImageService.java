@@ -20,10 +20,15 @@ import java.util.stream.Stream;
 public class ImageService {
     private final Path uploadDir;
     private final ImageRepo imageRepo;
+    private final AiService aiService;
 
-    public ImageService(@Value("${app.upload.dir}") String uploadDir, ImageRepo imageRepo) throws IOException {
+    @Value("${API_KEY}")
+    private String apiKey;
+
+    public ImageService(@Value("${app.upload.dir}") String uploadDir, ImageRepo imageRepo, AiService aiService) throws IOException {
         this.uploadDir = Paths.get(uploadDir);
         this.imageRepo = imageRepo;
+        this.aiService = aiService;
         try {
             Files.createDirectories(this.uploadDir); // ensure exists at startup
         } catch (Exception e) {
@@ -32,6 +37,7 @@ public class ImageService {
     }
 
     public ResponseEntity<String> saveImage(MultipartFile file, String message) {
+
         try {
             String filename = generateFilename(file);
             Path dest = Paths.get(uploadDir.toUri()).resolve(filename);
@@ -43,6 +49,7 @@ public class ImageService {
                     .fileSize(file.getSize())
                     .content("something something")
                     .message(message).build();
+            String imageDescription = aiService.getAiMessage(message);
             imageRepo.save(imageData);
             return ResponseEntity.ok("Saved to: " + dest.toString() + " | message=" + message);
         } catch (Exception e) {
